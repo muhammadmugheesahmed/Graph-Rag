@@ -96,7 +96,7 @@ At query time, the application finds the most relevant entity seeds, traverses t
 From Windows PowerShell, open the project directory:
 
 ```powershell
-cd "C:\Users\mughe\OneDrive\Desktop\Agentic & Graph RAG\graph rag"
+cd "C:\Users\graph rag"
 ```
 
 Create and activate a virtual environment:
@@ -125,8 +125,8 @@ python -m pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```dotenv
-GEMINI_API_KEY=your_gemini_api_key
-LLM_MODEL=gemini-2.5-flash
+API_KEY=your_api_key
+LLM_MODEL=gemini-2.5-flash 
 EMBEDDING_MODEL=gemini-embedding-001
 DOCS_DIR=./docs
 ```
@@ -135,7 +135,7 @@ Environment variables:
 
 | Variable | Required | Description |
 |---|---:|---|
-| `GEMINI_API_KEY` | Yes | Google Gemini API key |
+| `API_KEY` | Yes | openai/Grok/Gemini API key |
 | `LLM_MODEL` | Yes* | Model used for extraction and answer generation |
 | `EMBEDDING_MODEL` | Yes* | Model used for chunk and entity embeddings |
 | `DOCS_DIR` | No | Document directory; defaults to `./docs` |
