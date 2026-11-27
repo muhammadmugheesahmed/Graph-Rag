@@ -1,0 +1,20 @@
+Test Questions to Try in Your UI
+Once you click Re-index docs/, test these questions (set Graph Hops to 3 for the last two):
+
+1-Hop (Direct lookup):
+
+Question: "Who is the lead architect of Project Skyfall?"
+
+Expected: Dr. Aris Thorne (projects.txt).
+
+2-Hop (Cross-document link):
+
+Question: "Why is the October 2026 launch of Project Skyfall at risk?"
+
+Expected: Project Skyfall depends on the Falcon-X9 battery (projects.txt), and VoltCore Industries suspended shipments until January 2027 due to a thermal runaway defect (supply_chain.txt).
+
+3-Hop (Full graph traversal):
+
+Question: "How could Kenji Sato's announcement affect Nexus Dynamics' Robotics Division?"
+
+Expected path: Kenji Sato (delaying Falcon-X9 to Jan 2027) → Project Skyfall (misses Oct 2026 launch) → Alpine Logistics (cancels $40M contract) → Elena Morales (warns of a hiring freeze in the Robotics Division).
