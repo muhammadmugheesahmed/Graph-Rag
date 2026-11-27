@@ -1,0 +1,4 @@
+Nexus Dynamics is developing an autonomous drone platform called Project Skyfall.
+Dr. Aris Thorne is the lead architect of Project Skyfall, reporting directly to VP of Engineering Sarah Lin.
+Project Skyfall depends entirely on the Falcon-X9 battery module for its 6-hour flight time requirement.
+The commercial launch of Project Skyfall is scheduled for October 2026 in Zurich.

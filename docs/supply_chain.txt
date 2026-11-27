@@ -1,0 +1,4 @@
+The Falcon-X9 battery module is manufactured exclusively by VoltCore Industries.
+VoltCore Industries operates its primary lithium-silicon fabrication plant in Busan, South Korea.
+In August 2026, VoltCore Industries suspended all shipments of the Falcon-X9 due to a thermal runaway defect discovered during stress testing.
+VoltCore CEO Kenji Sato announced that a redesigned battery will not be ready until January 2027.
