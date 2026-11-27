@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GraphRAG Explorer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --user-bubble: #1d4ed8;
+      --bot-bubble: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    aside {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    h1 { font-size: 1.25rem; display: flex; align-items: center; gap: 8px; }
+    h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 10px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-card .val { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+    .control { margin-bottom: 14px; }
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+    .control input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+    button {
+      background: var(--accent);
+      color: #0f172a;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      width: 100%;
+    }
+    .btn-secondary:hover { background: var(--bg); }
+
+    /* Context Inspector */
+    .context-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .fact-list, .source-list {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.8rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .fact-item {
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 0.75rem;
+    }
+    .fact-item:last-child { border-bottom: none; }
+
+    .source-item {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .source-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .source-name { color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+    .source-text { color: var(--muted); line-height: 1.4; }
+
+    /* Main Chat Area */
+    main {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #chat-log {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .msg {
+      max-width: 78%;
+      padding: 14px 18px;
+      border-radius: 12px;
+      line-height: 1.55;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: var(--user-bubble);
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg.bot {
+      align-self: flex-start;
+      background: var(--bot-bubble);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .msg-meta {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      cursor: pointer;
+      display: inline-block;
+    }
+    .msg-meta:hover { text-decoration: underline; }
+
+    form {
+      display: flex;
+      gap: 10px;
+      padding: 16px 24px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+    }
+
+    #question-input {
+      flex: 1;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    #question-input:focus { border-color: var(--accent); }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      aside { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <div>
+      <h1>GraphRAG</h1>
+      <p style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+        Knowledge Graph + Vector Retrieval
+      </p>
+    </div>
+
+    <div>
+      <h2>Graph Index</h2>
+      <div class="stats">
+        <div class="stat-card"><div class="val" id="stat-nodes">-</div><div class="lbl">Nodes</div></div>
+        <div class="stat-card"><div class="val" id="stat-edges">-</div><div class="lbl">Edges</div></div>
+        <div class="stat-card"><div class="val" id="stat-chunks">-</div><div class="lbl">Chunks</div></div>
+      </div>
+      <button id="reindex-btn" class="btn-secondary" style="margin-top: 10px;">
+        Re-index docs/
+      </button>
+    </div>
+
+    <div>
+      <h2>Retrieval Settings</h2>
+      <div class="control">
+        <label><span>Top-K Seed Entities</span><span id="topk-val">3</span></label>
+        <input type="range" id="topk" min="1" max="10" value="3" />
+      </div>
+      <div class="control">
+        <label><span>Graph Hops</span><span id="hops-val">2</span></label>
+        <input type="range" id="hops" min="1" max="4" value="2" />
+      </div>
+    </div>
+
+    <div class="context-box">
+      <div>
+        <h2>Retrieved Triples</h2>
+        <div class="fact-list" id="facts-panel">
+          <span style="color: var(--muted);">Ask a question to inspect graph paths.</span>
+        </div>
+      </div>
+      <div>
+        <h2>Source Excerpts</h2>
+        <div class="source-list" id="sources-panel">
+          <span style="color: var(--muted);">Retrieved document chunks will appear here.</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div id="chat-log">
+      <div class="msg bot">Ready. Ask a question about the documents in your <strong>docs/</strong> folder.</div>
+    </div>
+
+    <form id="query-form">
+      <input
+        type="text"
+        id="question-input"
+        placeholder="Ask a multi-hop question about your documents..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit" id="send-btn">Ask</button>
+    </form>
+  </main>
+
+  <script>
+    const chatLog = document.getElementById("chat-log");
+    const form = document.getElementById("query-form");
+    const input = document.getElementById("question-input");
+    const sendBtn = document.getElementById("send-btn");
+    const reindexBtn = document.getElementById("reindex-btn");
+    const topkSlider = document.getElementById("topk");
+    const hopsSlider = document.getElementById("hops");
+
+    topkSlider.oninput = () => (document.getElementById("topk-val").textContent = topkSlider.value);
+    hopsSlider.oninput = () => (document.getElementById("hops-val").textContent = hopsSlider.value);
+
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const data = await res.json();
+        document.getElementById("stat-nodes").textContent = data.nodes;
+        document.getElementById("stat-edges").textContent = data.edges;
+        document.getElementById("stat-chunks").textContent = data.chunks;
+      } catch (err) {
+        console.error("Failed to load stats:", err);
+      }
+    }
+
+    function renderContext(facts, sources) {
+      const factsPanel = document.getElementById("facts-panel");
+      const sourcesPanel = document.getElementById("sources-panel");
+
+      factsPanel.innerHTML = facts.length
+        ? facts.map(f => `<div class="fact-item">${escapeHtml(f)}</div>`).join("")
+        : `<span style="color: var(--muted);">No graph relationships retrieved.</span>`;
+
+      sourcesPanel.innerHTML = sources.length
+        ? sources.map(s => `
+            <div class="source-item">
+              <div class="source-name">${escapeHtml(s.source)}</div>
+              <div class="source-text">${escapeHtml(s.text)}</div>
+            </div>`).join("")
+        : `<span style="color: var(--muted);">No source excerpts retrieved.</span>`;
+    }
+
+    function addMessage(text, role, contextData = null) {
+      const div = document.createElement("div");
+      div.className = `msg ${role}`;
+      div.textContent = text;
+
+      if (contextData) {
+        const meta = document.createElement("div");
+        meta.className = "msg-meta";
+        meta.textContent = `Inspect ${contextData.graph_facts.length} triples & ${contextData.sources.length} sources`;
+        meta.onclick = () => renderContext(contextData.graph_facts, contextData.sources);
+        div.appendChild(document.createElement("br"));
+        div.appendChild(meta);
+      }
+
+      chatLog.appendChild(div);
+      chatLog.scrollTop = chatLog.scrollHeight;
+      return div;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+
+    reindexBtn.onclick = async () => {
+      reindexBtn.disabled = true;
+      reindexBtn.textContent = "Indexing...";
+      try {
+        const res = await fetch("/api/reindex", { method: "POST" });
+        if (!res.ok) throw new Error((await res.json()).detail);
+        await loadStats();
+        addMessage("Documents re-indexed successfully.", "bot");
+      } catch (err) {
+        addMessage(`Re-index failed: ${err.message}`, "bot");
+      } finally {
+        reindexBtn.disabled = false;
+        reindexBtn.textContent = "Re-index docs/";
+      }
+    };
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      addMessage(question, "user");
+      input.value = "";
+      sendBtn.disabled = true;
+      const loadingMsg = addMessage("Searching knowledge graph...", "bot");
+
+      try {
+        const res = await fetch("/api/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question,
+            top_k_entities: Number(topkSlider.value),
+            hops: Number(hopsSlider.value),
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Query failed");
+
+        loadingMsg.remove();
+        addMessage(data.answer, "bot", data);
+        renderContext(data.graph_facts, data.sources);
+      } catch (err) {
+        loadingMsg.textContent = `Error: ${err.message}`;
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    };
+
+    loadStats();
+  </script>
+</body>
+</html>
